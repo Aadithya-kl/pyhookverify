@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61; python_version >= '3.9'"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyhookverify"
+version = "0.1.0"
+description = "Zero-dependency HMAC webhook signature verification and replay protection for Python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "draarivpatel-ui"}]
+keywords = ["webhook", "hmac", "signature", "replay", "security", "fastapi", "django", "flask"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[project.urls]
+Homepage = "https://github.com/draarivpatel-ui/pyhookverify"
+Issues = "https://github.com/draarivpatel-ui/pyhookverify/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pyhookverify = ["py.typed"]
