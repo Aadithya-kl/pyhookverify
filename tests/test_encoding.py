@@ -144,6 +144,22 @@ class TimestampTests(unittest.TestCase):
         with self.assertRaises(HookVerifyError):
             parse_timestamp("9" * 30)
 
+    def test_digit_run_longer_than_cpython_int_limit_rejected(self):
+        # CPython 3.11+ raises ValueError from int() past 4300 digits unless the
+        # length is checked first; the error must stay a HookVerifyError on every
+        # supported interpreter.
+        with self.assertRaises(HookVerifyError) as cm:
+            parse_timestamp("9" * 5000)
+        self.assertEqual(cm.exception.code, "invalid_timestamp")
+
+    def test_max_int64_accepted(self):
+        self.assertEqual(parse_timestamp("9223372036854775807"), 2 ** 63 - 1)
+
+    def test_above_max_int64_rejected(self):
+        with self.assertRaises(HookVerifyError) as cm:
+            parse_timestamp("9223372036854775808")
+        self.assertEqual(cm.exception.code, "invalid_timestamp")
+
 
 class ConstantTimeTests(unittest.TestCase):
     def test_equal(self):

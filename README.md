@@ -130,13 +130,13 @@ Multi-signature headers (Stripe and Standard Webhooks allow several `v1` values)
 
 Replay keys are written only after cryptographic verification succeeds. Invalid signatures, malformed headers, stale timestamps, and wrong secrets never poison the replay cache.
 
-`MemoryReplayStore` is bounded by `ttl_seconds` and `max_entries`, and purges expired entries on each check. The oldest entry is evicted at capacity. A strict cap of 32 candidate signatures per request limits parsing and comparison work.
+`MemoryReplayStore` is bounded by `ttl_seconds` and `max_entries`, and purges expired entries on each check. The oldest entry is evicted at capacity. The store serializes check-and-store and purge behind a reentrant lock, so concurrent request threads cannot both consume the same key and a purge cannot race a resize. A strict cap of 32 candidate signatures per request limits parsing and comparison work.
 
 ## Strict encoding rules
 
 * Hex must be non-empty, even-length, and contain only `0-9a-fA-F`. No `0x` prefix, whitespace, or Unicode digits.
 * Base64 must be canonical RFC 4648 with correct padding and zero padding bits. Re-encoding must reproduce the input exactly. URL-safe characters and whitespace are rejected.
-* Timestamps must be strict base-10 positive integers. Floats, signs, exponents, and Unicode digits are rejected.
+* Timestamps must be strict base-10 positive integers. Floats, signs, exponents, Unicode digits, and runs longer than 19 digits are rejected before integer conversion, so a multi-megabyte digit string cannot trigger the CPython 3.11+ conversion error or quadratic parsing.
 * A tolerance window (default 300 seconds) rejects both stale and excessive future skew. The clock is injectable for deterministic tests.
 
 All comparisons use `hmac.compare_digest` on decoded, equal-length `bytes` only.
@@ -186,7 +186,7 @@ The in-memory replay store is per-process and bounded. Under a valid-signature f
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-160 deterministic tests cover all six providers, strict hex and base64 rejection, timestamp edges, key rotation, multi-signature replay bypass attempts, pre-auth store poisoning, raw-body type enforcement, replay-store caps, and header normalization.
+166 deterministic tests cover all six providers, strict hex and base64 rejection, timestamp edges, key rotation, multi-signature replay bypass attempts, pre-auth store poisoning, raw-body type enforcement, replay-store caps and concurrency, and header normalization.
 
 ## License
 

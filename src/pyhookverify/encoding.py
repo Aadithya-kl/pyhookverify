@@ -83,6 +83,12 @@ def parse_timestamp(value: str, field: str = "timestamp") -> int:
     text = value.strip() if isinstance(value, str) else ""
     if not text or not text.isascii() or not text.isdecimal():
         raise HookVerifyError("invalid_timestamp", "%s must be a positive decimal integer" % field)
+    # 2 ** 63 - 1 has 19 digits. Reject longer strings before calling int():
+    # CPython 3.11+ raises ValueError past 4300 digits, which would escape as
+    # an uncaught error, and older builds spend quadratic time converting a
+    # multi-megabyte decimal.
+    if len(text) > 19:
+        raise HookVerifyError("invalid_timestamp", "%s is out of range" % field)
     parsed = int(text)
     if parsed > 2 ** 63 - 1:
         raise HookVerifyError("invalid_timestamp", "%s is out of range" % field)
