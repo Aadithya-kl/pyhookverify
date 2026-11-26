@@ -31,6 +31,7 @@ dev = []
 
 [project.urls]
 Homepage = "https://github.com/draarivpatel-ui/pyhookverify"
+Repository = "https://github.com/draarivpatel-ui/pyhookverify"
 Issues = "https://github.com/draarivpatel-ui/pyhookverify/issues"
 
 [tool.setuptools.packages.find]
